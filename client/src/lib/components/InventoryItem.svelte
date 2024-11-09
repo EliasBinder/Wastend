@@ -14,7 +14,7 @@
 	on:touchend
 	on:touchstart
 	on:touchmove
-	class="relative flex hyphens-auto transition-all flex-col gap-4 p-6 rounded-lg bg-gray-100/10 active:bg-gray-100/20 border-2 items-center justify-center {isMergeTarget
+	class="relative flex hyphens-auto transition-all flex-col gap-4 p-6 rounded-lg bg-white/40 active:bg-white/50 border-2 items-center justify-center {isMergeTarget
 		? 'border-white'
 		: 'border-transparent'}
 		{isDragging ? 'shadow-lg scale-105' : ''}
