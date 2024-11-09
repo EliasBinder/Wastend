@@ -6,7 +6,7 @@
 	import { writable } from 'svelte/store';
 	import { Droppable } from '@shopify/draggable';
 	import { onMount } from 'svelte';
-	import { getInventory } from '$lib/services/inventory';
+	import { getInventory, mergeItems } from '$lib/services/inventory';
 
 	let droppable;
 	let droppableOrigin;
@@ -49,19 +49,22 @@
 
 		if (!targetElement) return;
 
-		const draggedItem = items.find((item) => item.id == draggedElement.dataset.id);
+		const draggedItem = items.find((item) => item.name == draggedElement.dataset.id);
 		const targetItem = items.find(
-			(item) => item.id == targetElement.querySelector('.item').dataset.id
+			(item) => item.name == targetElement.querySelector('.item').dataset.id
 		);
 
 		if (draggedItem && targetItem && draggedItem !== targetItem) {
-			// Merging items
-			targetItem.value += ` + ${draggedItem.value}`;
-			items = items.filter((i) => i.id !== draggedItem.id);
-			setTimeout(() => {
-				draggedElement.remove();
-				initializeDraggable();
-			}, 1);
+			mergeItems({
+				item1: targetItem.name,
+				item2: draggedItem.name
+			}).then((response) => {
+				items = response.data.items;
+				setTimeout(() => {
+					draggedElement.remove();
+					initializeDraggable();
+				}, 20);
+			});
 		}
 	}
 </script>
@@ -76,11 +79,17 @@
 </AppBar>
 
 <PageContainer>
-	<div class="grid grid-cols-3 gap-4 draggable-container">
-		{#each items as item (item.id)}
+	<div class="grid grid-cols-2 gap-4 draggable-container">
+		{#each items as item (item.name)}
 			<div class="dropzone">
-				<div class="item" data-id={item.id}>
-					<InventoryItem emoji="🍾" text={item.value} />
+				<div class="item" data-id={item.name}>
+					<InventoryItem
+						emoji={item.icon}
+						text={item.name
+							.split('_')
+							.map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+							.join(' ')}
+					/>
 				</div>
 			</div>
 		{/each}

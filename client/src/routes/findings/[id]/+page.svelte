@@ -2,12 +2,14 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { apiUrl } from '$lib/services';
-	import TrashForm from '$lib/components/full-form/TrashForm.svelte';
-	import { goto } from '$app/navigation';
+	import { getFindings } from '$lib/services/finding';
 
-	let resolving = false;
+	let finding;
 	onMount(() => {
 		const id = $page.params.id;
+		getFindings().then((response) => {
+			finding = response.data.find((f) => f.id === id);
+		});
 	});
 </script>
 

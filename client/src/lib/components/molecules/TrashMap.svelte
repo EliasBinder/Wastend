@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { MapLibre, Marker } from 'svelte-maplibre';
+	import { Layer, GeoJSON, MapLibre, Marker } from 'svelte-maplibre';
 	import TrashForm from '../full-form/TrashForm.svelte';
 	import { getFindings, getResolves } from '$lib/services/finding';
 	import { goto } from '$app/navigation';
+	import { getEvents } from '$lib/services/event';
 	let currentPosition: GeolocationPosition;
 	let initialPosition: GeolocationPosition;
-	let logging = false;
 	let findings = [];
 	let resolves = [];
+	let circleSource;
 	onMount(() => {
 		navigator.geolocation.getCurrentPosition((position) => {
 			currentPosition = position;
@@ -19,6 +20,17 @@
 		});
 		getResolves().then((response) => {
 			resolves = response.data;
+		});
+		getEvents().then((response) => {
+			const events = response.data;
+			console.log(events);
+			circleSource = {
+				type: 'FeatureCollection',
+				features: events.map((e) => ({
+					type: 'Feature',
+					geometry: { type: 'Point', coordinates: [e.longitude, e.latitude] }
+				}))
+			};
 		});
 
 		const watch = navigator.geolocation.watchPosition((position) => {
@@ -40,6 +52,23 @@
 		class="h-full w-full"
 		style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 	>
+		{#if circleSource}
+			<GeoJSON id="circle-data" type="geojson" data={circleSource}>
+				<Layer
+					id="circles"
+					type="circle"
+					paint={{
+						'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 0, 14, 50, 22, 500],
+						// Slightly smaller radius for inner circle
+
+						'circle-color': 'rgba(0,0,255,0.5)',
+						'circle-stroke-width': 1,
+						'circle-stroke-color': 'rgba(0,0,255,0.75)'
+						// Light blue with lower opacity
+					}}
+				/>
+			</GeoJSON>
+		{/if}
 		{#if currentPosition}
 			<Marker
 				lngLat={[currentPosition.coords.longitude, currentPosition.coords.latitude]}
@@ -64,7 +93,8 @@
 			/>
 		{/each}
 	</MapLibre>
-	<a href="/form" class="btn absolute bottom-12 inset-x-12 variant-filled-primary z-10">Log Trash</a
+	<a href="/form" class="btn absolute bottom-12 inset-x-12 variant-filled-primary z-10"
+		>Report Trash</a
 	>
 </div>
 
