@@ -1,0 +1,4 @@
+.env
+backend/trash-detection-service/garbage_classification
+backend/trash-detection-service/.venv
+backend/trash-detection-service/.vscode
