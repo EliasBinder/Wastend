@@ -19,7 +19,7 @@ export function resolveFinding(data: any, findingId?: string) {
 }
 
 export function getFindings() {
-	return apiInstance.get('report/findings');
+	return apiInstance.get('report/findings?resolved=false');
 }
 
 export function getResolves() {

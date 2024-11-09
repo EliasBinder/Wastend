@@ -6,15 +6,11 @@
 	import { writable } from 'svelte/store';
 	import { Droppable } from '@shopify/draggable';
 	import { onMount } from 'svelte';
-
-	let items = writable([
-		{ id: 1, value: 'Bottle' },
-		{ id: 2, value: 'Bottle' },
-		{ id: 3, value: 'Bottle' }
-	]);
+	import { getInventory } from '$lib/services/inventory';
 
 	let droppable;
 	let droppableOrigin;
+	let items = [];
 
 	// Initialize Draggable
 	function initializeDraggable() {
@@ -40,7 +36,12 @@
 		});
 	}
 
-	onMount(initializeDraggable);
+	onMount(() => {
+		getInventory().then((response) => {
+			items = response.data.items;
+			initializeDraggable();
+		});
+	});
 
 	function handleDrop(event) {
 		const draggedElement = event.data.dragEvent.data.source;
@@ -48,15 +49,15 @@
 
 		if (!targetElement) return;
 
-		const draggedItem = $items.find((item) => item.id == draggedElement.dataset.id);
-		const targetItem = $items.find(
+		const draggedItem = items.find((item) => item.id == draggedElement.dataset.id);
+		const targetItem = items.find(
 			(item) => item.id == targetElement.querySelector('.item').dataset.id
 		);
 
 		if (draggedItem && targetItem && draggedItem !== targetItem) {
 			// Merging items
 			targetItem.value += ` + ${draggedItem.value}`;
-			items.update((allItems) => allItems.filter((i) => i.id !== draggedItem.id));
+			items = items.filter((i) => i.id !== draggedItem.id);
 			setTimeout(() => {
 				draggedElement.remove();
 				initializeDraggable();
@@ -76,7 +77,7 @@
 
 <PageContainer>
 	<div class="grid grid-cols-3 gap-4 draggable-container">
-		{#each $items as item (item.id)}
+		{#each items as item (item.id)}
 			<div class="dropzone">
 				<div class="item" data-id={item.id}>
 					<InventoryItem emoji="🍾" text={item.value} />

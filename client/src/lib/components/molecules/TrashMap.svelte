@@ -54,13 +54,13 @@
 				on:click={() => {
 					goto('/findings/' + finding.id);
 				}}
-				class="relative grid place-items-center h-4 w-4 bg-red-100 rounded-full border-white"
+				class="relative grid place-items-center h-4 w-4 bg-red-600 rounded-full border-white"
 			/>
 		{/each}
 		{#each resolves as resolve (resolve.id)}
 			<Marker
 				lngLat={[resolve.longitude, resolve.latitude]}
-				class="relative grid place-items-center h-4 w-4 bg-red-100 rounded-full border-white"
+				class="relative grid place-items-center h-4 w-4 bg-green-600 rounded-full border-white"
 			/>
 		{/each}
 	</MapLibre>
